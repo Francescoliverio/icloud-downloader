@@ -131,45 +131,51 @@ def update_metadata_in_zip(api, zip_path, downloaded_files_path, temp_dir):
     print(f"Metadata updated for files in ZIP archive: {zip_path}")
 
 # Function to download a single media file and optionally delete it
-def download_and_compress(photo, zip_path, progress_bar, downloaded_files, downloaded_files_path, temp_dir=None):
-    try:
-        filename = photo.filename
-        if filename in downloaded_files:
-            print(f"Skipping already downloaded file: {filename}")
-            progress_bar.update(1)  # Update the progress bar for skipped files
+def download_and_compress(photo, zip_path, progress_bar, downloaded_files, downloaded_files_path, temp_dir=None, max_retries=3):
+    for attempt in range(1, max_retries + 1):
+        try:
+            filename = photo.filename
+            if filename in downloaded_files:
+                print(f"Skipping already downloaded file: {filename}")
+                progress_bar.update(1)  # Update the progress bar for skipped files
+                return filename, True
+
+            download_url = photo.download()
+            file_data = download_url.raw.read()
+
+            if temp_dir:
+                # Save to a temporary directory for metadata adjustment
+                temp_file_path = os.path.join(temp_dir, filename)
+                with open(temp_file_path, "wb") as temp_file:
+                    temp_file.write(file_data)
+                adjust_file_metadata(temp_file_path, photo)
+
+                # Add to ZIP archive from the temporary file
+                with zip_lock:
+                    with zipfile.ZipFile(zip_path, "a", compression=zipfile.ZIP_DEFLATED) as zipf:
+                        zipf.write(temp_file_path, arcname=filename)
+                os.remove(temp_file_path)
+            else:
+                # Save directly to the ZIP archive
+                with zip_lock:
+                    with zipfile.ZipFile(zip_path, "a", compression=zipfile.ZIP_DEFLATED) as zipf:
+                        zipf.writestr(filename, file_data)
+
+            # Mark as downloaded
+            append_to_downloaded_files(downloaded_files_path, filename)
+
+            progress_bar.update(1)  # Update the progress bar
             return filename, True
-
-        download_url = photo.download()
-        file_data = download_url.raw.read()
-
-        if temp_dir:
-            # Save to a temporary directory for metadata adjustment
-            temp_file_path = os.path.join(temp_dir, filename)
-            with open(temp_file_path, "wb") as temp_file:
-                temp_file.write(file_data)
-            adjust_file_metadata(temp_file_path, photo)
-
-            # Add to ZIP archive from the temporary file
-            with zip_lock:
-                with zipfile.ZipFile(zip_path, "a", compression=zipfile.ZIP_DEFLATED) as zipf:
-                    zipf.write(temp_file_path, arcname=filename)
-            os.remove(temp_file_path)
-        else:
-            # Save directly to the ZIP archive
-            with zip_lock:
-                with zipfile.ZipFile(zip_path, "a", compression=zipfile.ZIP_DEFLATED) as zipf:
-                    zipf.writestr(filename, file_data)
-
-        # Mark as downloaded
-        append_to_downloaded_files(downloaded_files_path, filename)
-
-        progress_bar.update(1)  # Update the progress bar
-        return filename, True
-    except Exception as e:
-        print(f"Failed to download {photo.filename}: {e}")
-        progress_bar.update(1)  # Update the progress bar even for failed downloads
-        return photo.filename, False
-
+        except Exception as e:
+            print(f"Failed to download {photo.filename} (Attempt {attempt}/{max_retries}): {e}")
+            if attempt < max_retries:
+                backoff = 2 ** attempt  # Exponential backoff
+                print(f"Retrying in {backoff} seconds...")
+                time.sleep(backoff)
+            else:
+                print(f"Giving up on downloading {photo.filename} after {max_retries} attempts.")
+                progress_bar.update(1)  # Update the progress bar even for failed downloads
+                return photo.filename, False
 # Function to process photos in batches
 def process_photos_in_batches(api, zip_path, batch_size, max_workers, downloaded_files_path, temp_dir=None):
     photos = api.photos.all
