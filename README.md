@@ -9,6 +9,17 @@ This script helps manage your iCloud media by providing three key functionalitie
 
 The script also updates metadata for already downloaded files and ensures downloaded media retains accurate creation and modification timestamps.
 
+## Download more then 100GB from iCloud
+
+Please note that Apple iCloud has a maximum download speed of 4 MB/s. Therefore, I recommend requesting a copy of your data directly from Apple, especially for media files like photos and videos stored in iCloud. 
+
+The process is straightforward:
+1. Log in to your account at [https://privacy.apple.com/account](https://privacy.apple.com/account).
+2. Once logged in, click the **"Request a copy of your data >"** button.
+3. Select **iCloud Photos** or any other data you want to include.
+
+After making your selection, you can proceed with the request and specify the maximum size for the ZIP files to be downloaded. This will make managing your downloads much easier.
+
 ## Features
 
 - **Batch Processing**: Handle large volumes of media with adjustable batch sizes.
