@@ -84,7 +84,7 @@ def process_photos_in_batches(api, base_dir, batch_size, max_workers, downloaded
     with open(downloaded_files_path, "r") as f:
         already_downloaded = sum(1 for _ in f)
 
-    tqdm.write(f"Total photos: {total_photos}")
+    tqdm.write(f"Total media: {total_photos}")
     tqdm.write(f"Already downloaded: {already_downloaded}")
 
     # Debugging loop to print all filenames and check their presence in downloaded_files
@@ -92,7 +92,7 @@ def process_photos_in_batches(api, base_dir, batch_size, max_workers, downloaded
     #     print(f"Evaluating photo: {photo.filename}")
     #     print(f"Is in downloaded_files: {photo.filename in downloaded_files}")
 
-    # Filter out already downloaded photos
+    # Filter out already downloaded media
     photos_to_download = [photo for photo in photos if photo.filename not in downloaded_files]
     remaining_photos = len(photos_to_download)
 
@@ -100,7 +100,7 @@ def process_photos_in_batches(api, base_dir, batch_size, max_workers, downloaded
         print("All files have already been downloaded.")
         return
 
-    tqdm.write(f"Total photos to download: {remaining_photos}")
+    tqdm.write(f"Total media to download: {remaining_photos}")
 
     # Initialize progress bar with total_photos and initial=already_downloaded
     with tqdm(total=total_photos, desc="Processing media", unit="file", initial=already_downloaded) as progress_bar:
@@ -229,9 +229,9 @@ if __name__ == "__main__":
 
     # Choose an action
     print("\nChoose an action:")
-    print("1) Download all images from iCloud")
-    print("2) Delete all images from iCloud")
-    print("3) Download all images from iCloud and delete them after downloading")
+    print("1) Download all media from iCloud")
+    print("2) Delete all media from iCloud")
+    print("3) Download all media from iCloud and delete them after downloading")
     action = input("Enter the number corresponding to your choice: ").strip()
 
     # Perform the selected action

@@ -75,19 +75,6 @@ When you run the script, it will prompt you to:
    - `2` - Delete all images from iCloud.
    - `3` - Download all images from iCloud and delete them after downloading.
 
-### Parameters
-- **Base Directory**: Specify where to save the downloaded media (default: current working directory).
-- **ZIP File Name**: Name of the ZIP archive for storing downloaded files (default: `iCloudMedia.zip`).
-- **Batch Size**: Number of media files processed in one batch (default: 100).
-- **Max Workers**: Number of threads for parallel processing (default: 10, used only for downloads).
-
-### Example Walkthrough
-
-1. **Choose Action**: Select `1` to download all images.
-2. **Batch Size**: Set batch size to 50 for smoother processing.
-3. **ZIP File Name**: Use `MyPhotos.zip`.
-4. The script downloads your photos in batches and adjusts their metadata to preserve the original creation date.
-
 ---
 
 ## Logging and Metadata Management
